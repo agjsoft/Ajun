@@ -37,13 +37,11 @@ namespace server
         private Socket mSocket;
         private Dictionary<Socket, Session> mSessionMap = new Dictionary<Socket, Session>();
         private event EventHandler mOnAccept;
-        private event EventHandler mOnReceive;
         private event EventHandler<PacketEventArgs> mOnPacket;
 
-        public void Init(int port, EventHandler accept, EventHandler receive, EventHandler<PacketEventArgs> packet)
+        public void Init(int port, EventHandler accept, EventHandler<PacketEventArgs> packet)
         {
             mOnAccept += new EventHandler(accept);
-            mOnReceive += new EventHandler(receive);
             mOnPacket += new EventHandler<PacketEventArgs>(packet);
 
             mSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -79,8 +77,6 @@ namespace server
         {
             var session = e.UserToken as Session;
             var socket = sender as Socket;
-
-            mOnReceive(Thread.CurrentThread.ManagedThreadId, null);
 
             if (socket.Connected && e.BytesTransferred > 0)
             {

@@ -20,14 +20,14 @@ namespace client
         public int Tail = 0;
         private event EventHandler<PacketEventArgs> mOnPacket;
 
-        public void Init(EventHandler<PacketEventArgs> packet)
+        public void Init(string ip, int port, EventHandler<PacketEventArgs> packet)
         {
             mOnPacket += new EventHandler<PacketEventArgs>(packet);
 
             mSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
             var args = new SocketAsyncEventArgs();
-            args.RemoteEndPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 10000);
+            args.RemoteEndPoint = new IPEndPoint(IPAddress.Parse(ip), port);
             args.Completed += new EventHandler<SocketAsyncEventArgs>(Connect_Completed);
             mSocket.ConnectAsync(args);
         }

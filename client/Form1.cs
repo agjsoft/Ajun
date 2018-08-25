@@ -17,7 +17,7 @@ namespace client
         private void button1_Click(object sender, EventArgs e)
         {
             var client = new Client();
-            client.Init(OnPacket);
+            client.Init("127.0.0.1", 10000, OnPacket);
 
             var packet = new LoginReqPacket();
             packet.Id = "apple";

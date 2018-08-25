@@ -32,7 +32,7 @@ namespace server
         private void Form1_Load(object sender, EventArgs e)
         {
             timer1.Start();
-            mServer.Init(10000, OnAccept, OnReceive, OnPacket);
+            mServer.Init(10000, OnAccept, OnPacket);
         }
 
         private void OnAccept(object sender, EventArgs e)
