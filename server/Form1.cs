@@ -36,9 +36,7 @@ namespace server
         private void Form1_Load(object sender, EventArgs e)
         {
             timer1.Start();
-            mServer.Init();
-            mServer.OnAccept += new EventHandler(OnAccept);
-            mServer.OnReceive += new EventHandler(OnReceive);
+            mServer.Init(10000, OnAccept, OnReceive, OnPacket);
         }
 
         private void OnAccept(object sender, EventArgs e)
@@ -48,6 +46,24 @@ namespace server
                 type = optype.label1,
                 data = (int)sender
             });
+        }
+
+        private void OnPacket(object sender, EventArgs e)
+        {
+            var pr = (PacketReader)sender;
+            switch ((PacketId)pr.GetPacketId())
+            {
+                case PacketId.LoginReq:
+                    {
+                        var packet = new LoginReqPacket(pr);
+                    }
+                    break;
+                case PacketId.UpdateNameReq:
+                    {
+                        var packet = new UpdateNameReqPacket(pr);
+                    }
+                    break;
+            }
         }
 
         private void OnReceive(object sender, EventArgs e)
