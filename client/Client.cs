@@ -7,6 +7,7 @@ namespace client
 {
     public class PacketEventArgs : EventArgs
     {
+        public Client Client;
         public PacketId PacketId;
         public PacketReader Reader;
     }
@@ -59,6 +60,7 @@ namespace client
 
                     mOnPacket(null, new PacketEventArgs()
                     {
+                        Client = this,
                         PacketId = (PacketId)BitConverter.ToInt32(PacketBuffer, Head + 4),
                         Reader = new PacketReader(PacketBuffer, Head + 8)
                     });
