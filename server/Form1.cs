@@ -58,7 +58,7 @@ namespace server
                         sendPacket.Result = 0;
                         sendPacket.Message = "Success";
                         sendPacket.AccountId = 1982;
-                        e.Session.Send(PacketId.LoginAck, sendPacket);
+                        e.Session.Send(sendPacket);
                     }
                     break;
                 case PacketId.UpdateNameReq:

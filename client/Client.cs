@@ -65,11 +65,11 @@ namespace client
             }
         }
 
-        public void SendPacket(PacketId packetId, IPacket packet)
+        public void Send(PacketBase packet)
         {
             PacketWriter pw;
             packet.Encode(out pw);
-            pw.Close(packetId);
+            pw.Close(packet.PacketId);
             mSocket.Send(pw.Buffer, pw.Pos, SocketFlags.None);
         }
     }

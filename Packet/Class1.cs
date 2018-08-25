@@ -3,120 +3,10 @@ using System.Text;
 
 namespace Packet
 {
-    public class UpdateNameReqPacket : IPacket
+    public abstract class PacketBase
     {
-        public void Encode(out PacketWriter writer)
-        {
-            writer = new PacketWriter();
-        }
-
-        public UpdateNameReqPacket()
-        {
-        }
-
-        public UpdateNameReqPacket(PacketReader reader)
-        {
-
-        }
-    }
-
-    public class PacketWriter
-    {
-        public byte[] Buffer = new byte[1024];
-        public int Pos = 8;
-
-        public void Close(PacketId packetId)
-        {
-            Array.Copy(BitConverter.GetBytes(Pos), 0, Buffer, 0, sizeof(int));
-            Array.Copy(BitConverter.GetBytes((int)packetId), 0, Buffer, 4, sizeof(int));
-        }
-
-        public void SetShort(short val)
-        {
-            Array.Copy(BitConverter.GetBytes(val), 0, Buffer, Pos, sizeof(int));
-            Pos += sizeof(int);
-        }
-
-        public void SetInt(int val)
-        {
-            Array.Copy(BitConverter.GetBytes(val), 0, Buffer, Pos, sizeof(int));
-            Pos += sizeof(int);
-        }
-
-        public void SetLong(long val)
-        {
-            Array.Copy(BitConverter.GetBytes(val), 0, Buffer, Pos, sizeof(long));
-            Pos += sizeof(long);
-        }
-
-        public void SetString(string val)
-        {
-            var bytes = Encoding.UTF8.GetBytes(val);
-            SetInt(bytes.Length);
-            Array.Copy(bytes, 0, Buffer, Pos, bytes.Length);
-            Pos += bytes.Length;
-        }
-    }
-
-    public interface IPacket
-    {
-        void Encode(out PacketWriter writer);
-    }
-
-    public class LoginReqPacket : IPacket
-    {
-        public string Id;
-        public string Pw;
-
-        public void Encode(out PacketWriter writer)
-        {
-            writer = new PacketWriter();
-            writer.SetString(Id);
-            writer.SetString(Pw);
-        }
-
-        public LoginReqPacket()
-        {
-
-        }
-
-        public LoginReqPacket(PacketReader reader)
-        {
-            Id = reader.GetString();
-            Pw = reader.GetString();
-        }
-    }
-
-    public class LoginAckPacket : IPacket
-    {
-        public int Result;
-        public string Message;
-        public long AccountId;
-
-        public void Encode(out PacketWriter writer)
-        {
-            writer = new PacketWriter();
-            writer.SetInt(Result);
-            if (0 != Result)
-                return;
-
-            writer.SetString(Message);
-            writer.SetLong(AccountId);
-        }
-
-        public LoginAckPacket()
-        {
-        }
-
-        public LoginAckPacket(PacketReader reader)
-        {
-            Result = reader.GetInt();
-            if (0 != Result)
-                return;
-
-            Message = reader.GetString();
-            AccountId = reader.GetLong();
-        }
+        public PacketId PacketId;
+        public abstract void Encode(out PacketWriter writer);
     }
 
     public enum PacketId
@@ -186,6 +76,44 @@ namespace Packet
             string val = Encoding.UTF8.GetString(Buffer, Pos, len);
             Pos += len;
             return val;
+        }
+    }
+
+    public class PacketWriter
+    {
+        public byte[] Buffer = new byte[1024];
+        public int Pos = 8;
+
+        public void Close(PacketId packetId)
+        {
+            Array.Copy(BitConverter.GetBytes(Pos), 0, Buffer, 0, sizeof(int));
+            Array.Copy(BitConverter.GetBytes((int)packetId), 0, Buffer, 4, sizeof(int));
+        }
+
+        public void SetShort(short val)
+        {
+            Array.Copy(BitConverter.GetBytes(val), 0, Buffer, Pos, sizeof(int));
+            Pos += sizeof(int);
+        }
+
+        public void SetInt(int val)
+        {
+            Array.Copy(BitConverter.GetBytes(val), 0, Buffer, Pos, sizeof(int));
+            Pos += sizeof(int);
+        }
+
+        public void SetLong(long val)
+        {
+            Array.Copy(BitConverter.GetBytes(val), 0, Buffer, Pos, sizeof(long));
+            Pos += sizeof(long);
+        }
+
+        public void SetString(string val)
+        {
+            var bytes = Encoding.UTF8.GetBytes(val);
+            SetInt(bytes.Length);
+            Array.Copy(bytes, 0, Buffer, Pos, bytes.Length);
+            Pos += bytes.Length;
         }
     }
 }

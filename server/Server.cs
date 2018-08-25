@@ -16,11 +16,11 @@ namespace server
         public int Head = 0;
         public int Tail = 0;
 
-        public void Send(PacketId packetId, IPacket packet)
+        public void Send(PacketBase packet)
         {
             PacketWriter pw;
             packet.Encode(out pw);
-            pw.Close(packetId);
+            pw.Close(packet.PacketId);
             Socket.Send(pw.Buffer, pw.Pos, SocketFlags.None);
         }
     }
