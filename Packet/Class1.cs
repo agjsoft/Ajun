@@ -70,11 +70,16 @@ namespace Packet
             Pos += len;
             return val;
         }
+
+        public DateTime GetDateTime()
+        {
+            return new DateTime(GetLong());
+        }
     }
 
     public class PacketWriter
     {
-        public byte[] Buffer = new byte[1024];
+        public byte[] Buffer = new byte[2048];
         public int Pos = 8;
 
         public void Close(PacketId packetId)
@@ -107,6 +112,11 @@ namespace Packet
             SetInt(bytes.Length);
             Array.Copy(bytes, 0, Buffer, Pos, bytes.Length);
             Pos += bytes.Length;
+        }
+
+        public void SetDateTime(DateTime val)
+        {
+            SetLong(val.Ticks);
         }
     }
 }

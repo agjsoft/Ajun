@@ -58,6 +58,15 @@ namespace server
                         sendPacket.Result = 0;
                         sendPacket.Message = "Success";
                         sendPacket.AccountId = 1982;
+                        for (int i = 100; i < 200; i++)
+                        {
+                            sendPacket.Inven.Add(new Item()
+                            {
+                                Id = i,
+                                Expired = DateTime.Now,
+                                Count = i % 5
+                            });
+                        }
                         e.Session.Send(sendPacket);
                     }
                     break;

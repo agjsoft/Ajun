@@ -1,4 +1,7 @@
-﻿namespace Packet
+﻿using System;
+using System.Collections.Generic;
+
+namespace Packet
 {
     public class LoginReqPacket : PacketBase
     {
@@ -24,11 +27,37 @@
         }
     }
 
+    public class Item
+    {
+        public int Id;
+        public DateTime Expired;
+        public int Count;
+
+        public void Encode(PacketWriter writer)
+        {
+            writer.SetInt(Id);
+            writer.SetDateTime(Expired);
+            writer.SetInt(Count);
+        }
+
+        public Item()
+        {
+        }
+
+        public Item(PacketReader reader)
+        {
+            Id = reader.GetInt();
+            Expired = reader.GetDateTime();
+            Count = reader.GetInt();
+        }
+    }
+
     public class LoginAckPacket : PacketBase
     {
         public int Result;
         public string Message;
         public long AccountId;
+        public List<Item> Inven = new List<Item>();
 
         public override void Encode(out PacketWriter writer)
         {
@@ -39,6 +68,11 @@
 
             writer.SetString(Message);
             writer.SetLong(AccountId);
+            writer.SetInt(Inven.Count);
+            foreach (var i in Inven)
+            {
+                i.Encode(writer);
+            }
         }
 
         public LoginAckPacket()
@@ -54,6 +88,11 @@
 
             Message = reader.GetString();
             AccountId = reader.GetLong();
+            int count = reader.GetInt();
+            for (int i = 0; i < count; i++)
+            {
+                Inven.Add(new Item(reader));
+            }
         }
     }
 
