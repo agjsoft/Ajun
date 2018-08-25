@@ -17,18 +17,6 @@ namespace server
             InitializeComponent();
         }
 
-        public enum optype
-        {
-            label1Text,
-            listBox1,
-        }
-
-        public class op
-        {
-            public optype type;
-            public object data;
-        }
-
         private Socket m_ServerSocket;
         private List<Socket> m_ClientSocket;
         private byte[] szData;
@@ -103,7 +91,11 @@ namespace server
                 var sData = Encoding.Unicode.GetString(szData);
 
                 sData = sData.Replace("\0", "").Trim();
-                SetText(sData);
+                mQueue.Enqueue(new op()
+                {
+                    type = optype.richTextBox1,
+                    data = sData
+                });
                 e.SetBuffer(szData, 0, 1024);
                 //Thread.Sleep(500);
                 ClientSocket.ReceiveAsync(e);
@@ -120,26 +112,6 @@ namespace server
                 type = optype.label1Text,
                 data = m_ClientSocket.Count.ToString()
             });
-        }
-
-        private delegate void SetTextCallback(string text);
-        private void SetText(string text)
-        {
-            if (richTextBox1.InvokeRequired)
-            {
-                SetTextCallback d = new SetTextCallback(SetText);
-                this.Invoke(d, new object[] { text });
-            }
-            else
-            {
-                if (richTextBox1.TextLength > 0)
-                {
-                    richTextBox1.AppendText("\n");
-                }
-
-                richTextBox1.AppendText(text);
-                richTextBox1.ScrollToCaret();
-            }
         }
 
         private void timer1_Tick(object sender, EventArgs e)
@@ -165,7 +137,31 @@ namespace server
                         listBox1.Items.Add(threadId.ToString());
                     }
                     break;
+                case optype.richTextBox1:
+                    {
+                        if (richTextBox1.TextLength > 0)
+                        {
+                            richTextBox1.AppendText("\n");
+                        }
+
+                        richTextBox1.AppendText((string)todo.data);
+                        richTextBox1.ScrollToCaret();
+                    }
+                    break;
             }
         }
+    }
+
+    public enum optype
+    {
+        label1Text,
+        listBox1,
+        richTextBox1,
+    }
+
+    public class op
+    {
+        public optype type;
+        public object data;
     }
 }
