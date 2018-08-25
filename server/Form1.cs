@@ -1,12 +1,8 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Net;
-using System.Net.Sockets;
 using System.Windows.Forms;
-using System.Text;
-using System.Diagnostics;
-using System.Threading;
+using Packet;
 
 namespace server
 {

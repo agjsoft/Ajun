@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Text;
+using Packet;
 
 namespace server
 {
@@ -94,109 +95,6 @@ namespace server
                 socket.Dispose();
                 mSessionMap.Remove(socket);
             }
-        }
-    }
-
-    public class UpdateNameReqPacket
-    {
-        public UpdateNameReqPacket()
-        {
-        }
-
-        public UpdateNameReqPacket(PacketReader reader)
-        {
-
-        }
-    }
-
-    public class LoginReqPacket
-    {
-        public int Result;
-        public string Message;
-        public long AccountId;
-
-        public LoginReqPacket()
-        {
-        }
-
-        public LoginReqPacket(PacketReader reader)
-        {
-            Result = reader.GetInt();
-            if (0 != Result)
-                return;
-
-            Message = reader.GetString();
-            AccountId = reader.GetLong();
-        }
-    }
-
-    public enum PacketId
-    {
-        LoginReq = 7700,
-        LoginAck,
-        UpdateNameReq,
-        UpdateNameAck,
-    }
-
-    public class PacketReader
-    {
-        private int PacketId;
-        private byte[] Buffer;
-        private int Pos;
-
-        public PacketReader(int packetId, byte[] buffer, int pos)
-        {
-            PacketId = packetId;
-            Buffer = buffer;
-            Pos = pos;
-        }
-
-        public int GetPacketId()
-        {
-            return PacketId;
-        }
-
-        public short GetShort()
-        {
-            short val = BitConverter.ToInt16(Buffer, Pos);
-            Pos += sizeof(short);
-            return val;
-        }
-
-        public int GetInt()
-        {
-            int val = BitConverter.ToInt32(Buffer, Pos);
-            Pos += sizeof(int);
-            return val;
-        }
-
-        public long GetLong()
-        {
-            long val = BitConverter.ToInt64(Buffer, Pos);
-            Pos += sizeof(long);
-            return val;
-        }
-
-        public float GetFloat()
-        {
-            float val = BitConverter.ToSingle(Buffer, Pos);
-            Pos += sizeof(float);
-            return val;
-        }
-
-        public double GetDouble()
-        {
-            double val = BitConverter.ToDouble(Buffer, Pos);
-            Pos += sizeof(double);
-            return val;
-        }
-
-        public string GetString()
-        {
-            int len = GetInt();
-            string val = Encoding.UTF8.GetString(Buffer, Pos, len);
-            Pos += len;
-            return val;
         }
     }
 }
