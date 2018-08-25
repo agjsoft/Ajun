@@ -12,156 +12,80 @@ namespace server
 {
     public partial class Form1 : Form
     {
+        public enum optype
+        {
+            label1,
+            listBox1,
+        }
+
+        public class op
+        {
+            public optype type;
+            public object data;
+        }
+
         public Form1()
         {
             InitializeComponent();
         }
 
-        private Socket m_ServerSocket;
-        private List<Socket> m_ClientSocket;
-        private byte[] szData;
         private ConcurrentQueue<op> mQueue = new ConcurrentQueue<op>();
         private List<int> ThreadIdList = new List<int>();
+        private Server mServer = new Server();
 
         private void Form1_Load(object sender, EventArgs e)
         {
             timer1.Start();
-            m_ClientSocket = new List<Socket>();
-
-            m_ServerSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            var ipep = new IPEndPoint(IPAddress.Any, 10000);
-            m_ServerSocket.Bind(ipep);
-            m_ServerSocket.Listen(20);
-
-            var args = new SocketAsyncEventArgs();
-            args.Completed += new EventHandler<SocketAsyncEventArgs>(Accept_Completed);
-            m_ServerSocket.AcceptAsync(args);
+            mServer.Init();
+            mServer.OnAccept += new EventHandler(OnAccept);
+            mServer.OnReceive += new EventHandler(OnReceive);
         }
 
-        private void Accept_Completed(object sender, SocketAsyncEventArgs e)
+        private void OnAccept(object sender, EventArgs e)
         {
-            var clientSocket = e.AcceptSocket;
-            m_ClientSocket.Add(clientSocket);
-
             mQueue.Enqueue(new op()
             {
-                type = optype.label1Text,
-                data = m_ClientSocket.Count.ToString()
+                type = optype.label1,
+                data = (int)sender
             });
-
-            try
-            {
-                if (m_ClientSocket != null)
-                {
-                    var args = new SocketAsyncEventArgs();
-
-                    szData = new byte[1024];
-                    args.SetBuffer(szData, 0, szData.Length);
-                    args.UserToken = m_ClientSocket;
-                    args.Completed += new EventHandler<SocketAsyncEventArgs>(Receive_Completed);
-                    clientSocket.ReceiveAsync(args);
-                }
-
-                e.AcceptSocket = null;
-                m_ServerSocket.AcceptAsync(e);
-            }
-            catch (SocketException se)
-            {
-                Trace.WriteLine(string.Format("SocketException : {0}", se.Message));
-            }
-            catch (Exception ex)
-            {
-                Trace.WriteLine(string.Format("Exception : {0}", ex.Message));
-            }
         }
 
-        private void Receive_Completed(object sender, SocketAsyncEventArgs e)
+        private void OnReceive(object sender, EventArgs e)
         {
-            var ClientSocket = sender as Socket;
-
             mQueue.Enqueue(new op()
             {
                 type = optype.listBox1,
-                data = Thread.CurrentThread.ManagedThreadId
-            });
-
-            if (ClientSocket.Connected && e.BytesTransferred > 0)
-            {
-                byte[] szData = e.Buffer;
-                var sData = Encoding.Unicode.GetString(szData);
-
-                sData = sData.Replace("\0", "").Trim();
-                mQueue.Enqueue(new op()
-                {
-                    type = optype.richTextBox1,
-                    data = sData
-                });
-                e.SetBuffer(szData, 0, 1024);
-                //Thread.Sleep(500);
-                ClientSocket.ReceiveAsync(e);
-            }
-            else
-            {
-                ClientSocket.Disconnect(false);
-                ClientSocket.Dispose();
-                m_ClientSocket.Remove(ClientSocket);
-            }
-
-            mQueue.Enqueue(new op()
-            {
-                type = optype.label1Text,
-                data = m_ClientSocket.Count.ToString()
+                data = (int)sender
             });
         }
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            op todo;
-            if (false == mQueue.TryDequeue(out todo))
-                return;
-
-            switch (todo.type)
+            for (int i = 0; i < 128; i++)
             {
-                case optype.label1Text:
-                    {
-                        label1.Text = (string)todo.data;
-                    }
-                    break;
-                case optype.listBox1:
-                    {
-                        int threadId = (int)todo.data;
-                        if (ThreadIdList.Contains(threadId))
-                            break;
+                op todo;
+                if (false == mQueue.TryDequeue(out todo))
+                    return;
 
-                        ThreadIdList.Add(threadId);
-                        listBox1.Items.Add(threadId.ToString());
-                    }
-                    break;
-                case optype.richTextBox1:
-                    {
-                        if (richTextBox1.TextLength > 0)
+                switch (todo.type)
+                {
+                    case optype.label1:
                         {
-                            richTextBox1.AppendText("\n");
+                            label1.Text = ((int)todo.data).ToString();
                         }
+                        break;
+                    case optype.listBox1:
+                        {
+                            int threadId = (int)todo.data;
+                            if (ThreadIdList.Contains(threadId))
+                                break;
 
-                        richTextBox1.AppendText((string)todo.data);
-                        richTextBox1.ScrollToCaret();
-                    }
-                    break;
+                            ThreadIdList.Add(threadId);
+                            listBox1.Items.Add(threadId.ToString());
+                        }
+                        break;
+                }
             }
         }
-    }
-
-    public enum optype
-    {
-        label1Text,
-        listBox1,
-        richTextBox1,
-    }
-
-    public class op
-    {
-        public optype type;
-        public object data;
     }
 }
