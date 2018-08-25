@@ -15,6 +15,20 @@ namespace server
         public byte[] PacketBuffer = new byte[8192];
         public int Head = 0;
         public int Tail = 0;
+
+        public void Send(PacketId packetId, IPacket packet)
+        {
+            PacketWriter pw;
+            packet.Encode(out pw);
+            pw.Close(packetId);
+            Socket.Send(pw.Buffer, pw.Pos, SocketFlags.None);
+        }
+    }
+
+    public class PacketEventArgs : EventArgs
+    {
+        public Session Session;
+        public PacketReader Reader;
     }
 
     public class Server
@@ -23,13 +37,13 @@ namespace server
         private Dictionary<Socket, Session> mSessionMap = new Dictionary<Socket, Session>();
         private event EventHandler mOnAccept;
         private event EventHandler mOnReceive;
-        private event EventHandler mOnPacket;
+        private event EventHandler<PacketEventArgs> mOnPacket;
 
-        public void Init(int port, EventHandler accept, EventHandler receive, EventHandler packet)
+        public void Init(int port, EventHandler accept, EventHandler receive, EventHandler<PacketEventArgs> packet)
         {
             mOnAccept += new EventHandler(accept);
             mOnReceive += new EventHandler(receive);
-            mOnPacket += new EventHandler(packet);
+            mOnPacket += new EventHandler<PacketEventArgs>(packet);
 
             mSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             mSocket.Bind(new IPEndPoint(IPAddress.Any, port));
@@ -79,11 +93,15 @@ namespace server
                         break;
 
                     int packetSize = BitConverter.ToInt32(session.PacketBuffer, session.Head);
-                    if (dataLen - 4 < packetSize)
+                    if (dataLen < packetSize)
                         break;
 
                     int packetId = BitConverter.ToInt32(session.PacketBuffer, session.Head + 4);
-                    mOnPacket(new PacketReader(packetId, session.PacketBuffer, session.Head + 8), null);
+                    mOnPacket(null, new PacketEventArgs()
+                    {
+                        Session = session,
+                        Reader = new PacketReader(packetId, session.PacketBuffer, session.Head + 8)
+                    });
                     session.Head += packetSize;
                 }
 

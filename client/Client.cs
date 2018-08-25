@@ -1,5 +1,4 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
+﻿using System;
 using System.Net;
 using System.Net.Sockets;
 using Packet;
@@ -9,40 +8,61 @@ namespace client
     public class Client
     {
         private Socket mSocket = null;
+        public byte[] Buffer = new byte[1024];
+        public byte[] PacketBuffer = new byte[8192];
+        public int Head = 0;
+        public int Tail = 0;
+        private event EventHandler mOnPacket;
 
-        public void Init()
+        public void Init(EventHandler packet)
         {
+            mOnPacket += new EventHandler(packet);
+
             mSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
             var args = new SocketAsyncEventArgs();
             args.RemoteEndPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 10000);
+            args.Completed += new EventHandler<SocketAsyncEventArgs>(Connect_Completed);
             mSocket.ConnectAsync(args);
         }
 
-        public void Work()
+        private void Connect_Completed(object sender, SocketAsyncEventArgs e)
         {
-            //var args = new SocketAsyncEventArgs();
-            //args.SetBuffer(szData, 0, szData.Length);
+            var args = new SocketAsyncEventArgs();
+            args.SetBuffer(Buffer, 0, Buffer.Length);
+            args.Completed += new EventHandler<SocketAsyncEventArgs>(Receive_Completed);
+            mSocket.ReceiveAsync(args);
+        }
 
-            Task.Run(() =>
+        private void Receive_Completed(object sender, SocketAsyncEventArgs e)
+        {
+            if (mSocket.Connected && e.BytesTransferred > 0)
             {
-                while (true)
-                {
-                    if (mSocket.Connected)
-                        break;
-                    Thread.Sleep(1);
-                }
+                Array.Copy(e.Buffer, 0, PacketBuffer, Tail, e.BytesTransferred);
+                Tail += e.BytesTransferred;
 
                 while (true)
                 {
-                    var packet = new LoginReqPacket();
-                    packet.Result = 0;
-                    packet.Message = "하하하";
-                    packet.AccountId = 19820514;
-                    SendPacket(PacketId.LoginReq, packet);
-                    Thread.Sleep(200);
+                    int dataLen = Tail - Head;
+                    if (dataLen < 8)
+                        break;
+
+                    int packetSize = BitConverter.ToInt32(PacketBuffer, Head);
+                    if (dataLen < packetSize)
+                        break;
+
+                    int packetId = BitConverter.ToInt32(PacketBuffer, Head + 4);
+                    mOnPacket(new PacketReader(packetId, PacketBuffer, Head + 8), null);
+                    Head += packetSize;
                 }
-            });
+
+                mSocket.ReceiveAsync(e);
+            }
+            else
+            {
+                mSocket.Disconnect(false);
+                mSocket.Dispose();
+            }
         }
 
         public void SendPacket(PacketId packetId, IPacket packet)

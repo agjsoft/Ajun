@@ -44,19 +44,26 @@ namespace server
             });
         }
 
-        private void OnPacket(object sender, EventArgs e)
+        private void OnPacket(object sender, PacketEventArgs e)
         {
-            var pr = (PacketReader)sender;
-            switch ((PacketId)pr.GetPacketId())
+            switch ((PacketId)e.Reader.GetPacketId())
             {
                 case PacketId.LoginReq:
                     {
-                        var packet = new LoginReqPacket(pr);
+                        var packet = new LoginReqPacket(e.Reader);
+                        string id = packet.Id;
+                        string pw = packet.Pw;
+
+                        var sendPacket = new LoginAckPacket();
+                        sendPacket.Result = 0;
+                        sendPacket.Message = "Success";
+                        sendPacket.AccountId = 1982;
+                        e.Session.Send(PacketId.LoginAck, sendPacket);
                     }
                     break;
                 case PacketId.UpdateNameReq:
                     {
-                        var packet = new UpdateNameReqPacket(pr);
+                        var packet = new UpdateNameReqPacket(e.Reader);
                     }
                     break;
             }

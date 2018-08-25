@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Packet
 {
@@ -68,6 +65,30 @@ namespace Packet
 
     public class LoginReqPacket : IPacket
     {
+        public string Id;
+        public string Pw;
+
+        public void Encode(out PacketWriter writer)
+        {
+            writer = new PacketWriter();
+            writer.SetString(Id);
+            writer.SetString(Pw);
+        }
+
+        public LoginReqPacket()
+        {
+
+        }
+
+        public LoginReqPacket(PacketReader reader)
+        {
+            Id = reader.GetString();
+            Pw = reader.GetString();
+        }
+    }
+
+    public class LoginAckPacket : IPacket
+    {
         public int Result;
         public string Message;
         public long AccountId;
@@ -83,11 +104,11 @@ namespace Packet
             writer.SetLong(AccountId);
         }
 
-        public LoginReqPacket()
+        public LoginAckPacket()
         {
         }
 
-        public LoginReqPacket(PacketReader reader)
+        public LoginAckPacket(PacketReader reader)
         {
             Result = reader.GetInt();
             if (0 != Result)
