@@ -27,14 +27,13 @@ namespace client
             mClientList.Add(client);
         }
 
-        private void OnPacket(object sender, EventArgs e)
+        private void OnPacket(object sender, PacketEventArgs e)
         {
-            var pr = (PacketReader)sender;
-            switch ((PacketId)pr.GetPacketId())
+            switch (e.PacketId)
             {
                 case PacketId.LoginAck:
                     {
-                        var packet = new LoginAckPacket(pr);
+                        var packet = new LoginAckPacket(e.Reader);
                         int ret = packet.Result;
                         string msg = packet.Message;
                         long id = packet.AccountId;

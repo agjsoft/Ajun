@@ -28,6 +28,7 @@ namespace server
     public class PacketEventArgs : EventArgs
     {
         public Session Session;
+        public PacketId PacketId;
         public PacketReader Reader;
     }
 
@@ -96,11 +97,11 @@ namespace server
                     if (dataLen < packetSize)
                         break;
 
-                    int packetId = BitConverter.ToInt32(session.PacketBuffer, session.Head + 4);
                     mOnPacket(null, new PacketEventArgs()
                     {
                         Session = session,
-                        Reader = new PacketReader(packetId, session.PacketBuffer, session.Head + 8)
+                        PacketId = (PacketId)BitConverter.ToInt32(session.PacketBuffer, session.Head + 4),
+                        Reader = new PacketReader(session.PacketBuffer, session.Head + 8)
                     });
                     session.Head += packetSize;
                 }

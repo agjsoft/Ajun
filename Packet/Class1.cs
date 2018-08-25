@@ -19,20 +19,13 @@ namespace Packet
 
     public class PacketReader
     {
-        private int PacketId;
         private byte[] Buffer;
         private int Pos;
 
-        public PacketReader(int packetId, byte[] buffer, int pos)
+        public PacketReader(byte[] buffer, int pos)
         {
-            PacketId = packetId;
             Buffer = buffer;
             Pos = pos;
-        }
-
-        public int GetPacketId()
-        {
-            return PacketId;
         }
 
         public short GetShort()

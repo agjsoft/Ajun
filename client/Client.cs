@@ -5,6 +5,12 @@ using Packet;
 
 namespace client
 {
+    public class PacketEventArgs : EventArgs
+    {
+        public PacketId PacketId;
+        public PacketReader Reader;
+    }
+
     public class Client
     {
         private Socket mSocket = null;
@@ -12,11 +18,11 @@ namespace client
         public byte[] PacketBuffer = new byte[8192];
         public int Head = 0;
         public int Tail = 0;
-        private event EventHandler mOnPacket;
+        private event EventHandler<PacketEventArgs> mOnPacket;
 
-        public void Init(EventHandler packet)
+        public void Init(EventHandler<PacketEventArgs> packet)
         {
-            mOnPacket += new EventHandler(packet);
+            mOnPacket += new EventHandler<PacketEventArgs>(packet);
 
             mSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
@@ -51,8 +57,11 @@ namespace client
                     if (dataLen < packetSize)
                         break;
 
-                    int packetId = BitConverter.ToInt32(PacketBuffer, Head + 4);
-                    mOnPacket(new PacketReader(packetId, PacketBuffer, Head + 8), null);
+                    mOnPacket(null, new PacketEventArgs()
+                    {
+                        PacketId = (PacketId)BitConverter.ToInt32(PacketBuffer, Head + 4),
+                        Reader = new PacketReader(PacketBuffer, Head + 8)
+                    });
                     Head += packetSize;
                 }
 

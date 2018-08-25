@@ -46,7 +46,7 @@ namespace server
 
         private void OnPacket(object sender, PacketEventArgs e)
         {
-            switch ((PacketId)e.Reader.GetPacketId())
+            switch (e.PacketId)
             {
                 case PacketId.LoginReq:
                     {
