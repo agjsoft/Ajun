@@ -4,30 +4,12 @@ using System.Net.Sockets;
 
 namespace Packet
 {
-    public class SessionBase
-    {
-        public Socket Socket;
-        public byte[] Buffer = new byte[1024];
-        public byte[] PacketBuffer = new byte[8192];
-        public int Head = 0;
-        public int Tail = 0;
-
-        public void Send(PacketBase packet)
-        {
-            PacketWriter pw;
-            packet.Encode(out pw);
-            pw.Close(packet.PacketId);
-            Socket.Send(pw.Buffer, pw.Pos, SocketFlags.None);
-        }
-    }
-
     public abstract class ServerBase<T> where T : SessionBase, new()
     {
         private Socket mSocket;
 
         public abstract void OnAccept(T session);
         public abstract void OnDisconnect(T session);
-        public abstract void OnPacket(T session, PacketId packetId, PacketReader reader);
 
         public void Init(int port)
         {
@@ -79,7 +61,7 @@ namespace Packet
                     if (dataLen < packetSize)
                         break;
 
-                    OnPacket(session,
+                    session.OnPacket(
                         (PacketId)BitConverter.ToInt32(session.PacketBuffer, session.Head + 4),
                         new PacketReader(session.PacketBuffer, session.Head + 8));
                     session.Head += packetSize;
