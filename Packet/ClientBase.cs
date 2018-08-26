@@ -3,7 +3,7 @@ using System.Net;
 using System.Net.Sockets;
 using Packet;
 
-namespace client
+namespace Packet
 {
     public abstract class ClientBase
     {
