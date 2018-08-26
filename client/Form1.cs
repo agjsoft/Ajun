@@ -17,7 +17,7 @@ namespace client
         private void button1_Click(object sender, EventArgs e)
         {
             var client = new Client();
-            client.Init("127.0.0.1", 10000, OnPacket);
+            client.Init("127.0.0.1", 10000);
 
             var packet = new LoginReqPacket();
             packet.Id = "apple";
@@ -26,14 +26,21 @@ namespace client
 
             mClientList.Add(client);
         }
+    }
 
-        private void OnPacket(object sender, PacketEventArgs e)
+    public class Client : ClientBase
+    {
+        public override void OnConnect()
         {
-            switch (e.PacketId)
+        }
+
+        public override void OnPacket(PacketId packetId, PacketReader reader)
+        {
+            switch (packetId)
             {
                 case PacketId.LoginAck:
                     {
-                        var packet = new LoginAckPacket(e.Reader);
+                        var packet = new LoginAckPacket(reader);
                         int ret = packet.Result;
                         string msg = packet.Message;
                         long id = packet.AccountId;

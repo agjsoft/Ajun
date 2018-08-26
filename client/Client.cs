@@ -5,26 +5,19 @@ using Packet;
 
 namespace client
 {
-    public class PacketEventArgs : EventArgs
-    {
-        public Client Client;
-        public PacketId PacketId;
-        public PacketReader Reader;
-    }
-
-    public class Client
+    public abstract class ClientBase
     {
         private Socket mSocket = null;
         public byte[] Buffer = new byte[1024];
         public byte[] PacketBuffer = new byte[8192];
         public int Head = 0;
         public int Tail = 0;
-        private event EventHandler<PacketEventArgs> mOnPacket;
 
-        public void Init(string ip, int port, EventHandler<PacketEventArgs> packet)
+        public abstract void OnConnect();
+        public abstract void OnPacket(PacketId packetId, PacketReader reader);
+
+        public void Init(string ip, int port)
         {
-            mOnPacket += new EventHandler<PacketEventArgs>(packet);
-
             mSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
             var args = new SocketAsyncEventArgs();
@@ -35,6 +28,8 @@ namespace client
 
         private void Connect_Completed(object sender, SocketAsyncEventArgs e)
         {
+            OnConnect();
+
             var args = new SocketAsyncEventArgs();
             args.SetBuffer(Buffer, 0, Buffer.Length);
             args.Completed += new EventHandler<SocketAsyncEventArgs>(Receive_Completed);
@@ -58,12 +53,9 @@ namespace client
                     if (dataLen < packetSize)
                         break;
 
-                    mOnPacket(null, new PacketEventArgs()
-                    {
-                        Client = this,
-                        PacketId = (PacketId)BitConverter.ToInt32(PacketBuffer, Head + 4),
-                        Reader = new PacketReader(PacketBuffer, Head + 8)
-                    });
+                    OnPacket(
+                        (PacketId)BitConverter.ToInt32(PacketBuffer, Head + 4),
+                        new PacketReader(PacketBuffer, Head + 8));
                     Head += packetSize;
                 }
 

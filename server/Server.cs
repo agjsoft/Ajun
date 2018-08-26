@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using Packet;
 
 namespace server
 {
-    public class Session
+    public class SessionBase
     {
         public Socket Socket;
         public byte[] Buffer = new byte[1024];
@@ -23,27 +22,16 @@ namespace server
         }
     }
 
-    public class PacketEventArgs : EventArgs
-    {
-        public Session Session;
-        public PacketId PacketId;
-        public PacketReader Reader;
-    }
-
-    public class Server
+    public abstract class ServerBase<T> where T : SessionBase, new()
     {
         private Socket mSocket;
-        private Dictionary<Socket, Session> mSessionMap = new Dictionary<Socket, Session>();
-        private event EventHandler mOnAccept;
-        private event EventHandler<PacketEventArgs> mOnPacket;
-        private event EventHandler mOnDisconnect;
 
-        public void Init(int port, EventHandler accept, EventHandler<PacketEventArgs> packet, EventHandler disconnect)
+        public abstract void OnAccept(T session);
+        public abstract void OnDisconnect(T session);
+        public abstract void OnPacket(T session, PacketId packetId, PacketReader reader);
+
+        public void Init(int port)
         {
-            mOnAccept += new EventHandler(accept);
-            mOnPacket += new EventHandler<PacketEventArgs>(packet);
-            mOnDisconnect += new EventHandler(disconnect);
-
             mSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             mSocket.Bind(new IPEndPoint(IPAddress.Any, port));
             mSocket.Listen(20);
@@ -55,13 +43,12 @@ namespace server
 
         private void Accept_Completed(object sender, SocketAsyncEventArgs e)
         {
-            var session = new Session()
+            var session = new T()
             {
                 Socket = e.AcceptSocket
             };
-            mSessionMap.Add(session.Socket, session);
 
-            mOnAccept(mSessionMap.Count, null);
+            OnAccept(session);
 
             var args = new SocketAsyncEventArgs();
             args.SetBuffer(session.Buffer, 0, session.Buffer.Length);
@@ -75,7 +62,7 @@ namespace server
 
         private void Receive_Completed(object sender, SocketAsyncEventArgs e)
         {
-            var session = e.UserToken as Session;
+            var session = e.UserToken as T;
             var socket = sender as Socket;
 
             if (socket.Connected && e.BytesTransferred > 0)
@@ -93,12 +80,9 @@ namespace server
                     if (dataLen < packetSize)
                         break;
 
-                    mOnPacket(null, new PacketEventArgs()
-                    {
-                        Session = session,
-                        PacketId = (PacketId)BitConverter.ToInt32(session.PacketBuffer, session.Head + 4),
-                        Reader = new PacketReader(session.PacketBuffer, session.Head + 8)
-                    });
+                    OnPacket(session,
+                        (PacketId)BitConverter.ToInt32(session.PacketBuffer, session.Head + 4),
+                        new PacketReader(session.PacketBuffer, session.Head + 8));
                     session.Head += packetSize;
                 }
 
@@ -106,10 +90,9 @@ namespace server
             }
             else
             {
-                mOnDisconnect(session, null);
+                OnDisconnect(session);
                 socket.Disconnect(false);
                 socket.Dispose();
-                mSessionMap.Remove(socket);
             }
         }
     }

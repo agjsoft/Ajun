@@ -25,6 +25,62 @@ namespace server
             InitializeComponent();
         }
 
+        public class Session : SessionBase
+        {
+            public string Guid;
+        }
+
+        public class Server : ServerBase<Session>
+        {
+            public ConcurrentDictionary<string, Session> UserMap = new ConcurrentDictionary<string, Session>();
+
+            public override void OnAccept(Session session)
+            {
+                session.Guid = Guid.NewGuid().ToString("N");
+                UserMap.TryAdd(session.Guid, session);
+            }
+
+            public override void OnDisconnect(Session session)
+            {
+                Session tmp;
+                UserMap.TryRemove(session.Guid, out tmp);
+            }
+
+            public override void OnPacket(Session session, PacketId packetId, PacketReader reader)
+            {
+                switch (packetId)
+                {
+                    case PacketId.LoginReq:
+                        {
+                            var packet = new LoginReqPacket(reader);
+                            string id = packet.Id;
+                            string pw = packet.Pw;
+
+                            var sendPacket = new LoginAckPacket();
+                            sendPacket.Result = 0;
+                            sendPacket.Message = "Success";
+                            sendPacket.AccountId = 1982;
+                            for (int i = 100; i < 200; i++)
+                            {
+                                sendPacket.Inven.Add(new Item()
+                                {
+                                    Id = i,
+                                    Expired = DateTime.Now,
+                                    Count = i % 5
+                                });
+                            }
+                            session.Send(sendPacket);
+                        }
+                        break;
+                    case PacketId.UpdateNameReq:
+                        {
+                            var packet = new UpdateNameReqPacket(reader);
+                        }
+                        break;
+                }
+            }
+        }
+
         private ConcurrentQueue<op> mQueue = new ConcurrentQueue<op>();
         private List<int> ThreadIdList = new List<int>();
         private Server mServer = new Server();
@@ -32,63 +88,7 @@ namespace server
         private void Form1_Load(object sender, EventArgs e)
         {
             timer1.Start();
-            mServer.Init(10000, OnAccept, OnPacket, OnDisconnect);
-        }
-
-        private void OnAccept(object sender, EventArgs e)
-        {
-            mQueue.Enqueue(new op()
-            {
-                type = optype.label1,
-                data = (int)sender
-            });
-        }
-
-        private void OnDisconnect(object sender, EventArgs e)
-        {
-        }
-
-        private void OnPacket(object sender, PacketEventArgs e)
-        {
-            switch (e.PacketId)
-            {
-                case PacketId.LoginReq:
-                    {
-                        var packet = new LoginReqPacket(e.Reader);
-                        string id = packet.Id;
-                        string pw = packet.Pw;
-
-                        var sendPacket = new LoginAckPacket();
-                        sendPacket.Result = 0;
-                        sendPacket.Message = "Success";
-                        sendPacket.AccountId = 1982;
-                        for (int i = 100; i < 200; i++)
-                        {
-                            sendPacket.Inven.Add(new Item()
-                            {
-                                Id = i,
-                                Expired = DateTime.Now,
-                                Count = i % 5
-                            });
-                        }
-                        e.Session.Send(sendPacket);
-                    }
-                    break;
-                case PacketId.UpdateNameReq:
-                    {
-                        var packet = new UpdateNameReqPacket(e.Reader);
-                    }
-                    break;
-            }
-        }
-
-        private void OnReceive(object sender, EventArgs e)
-        {
-            mQueue.Enqueue(new op()
-            {
-                type = optype.listBox1,
-                data = (int)sender
-            });
+            mServer.Init(10000);
         }
 
         private void timer1_Tick(object sender, EventArgs e)
