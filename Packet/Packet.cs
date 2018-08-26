@@ -8,9 +8,8 @@ namespace Packet
         public string Id;
         public string Pw;
 
-        public override void Encode(out PacketWriter writer)
+        public override void Encode(PacketWriter writer)
         {
-            writer = new PacketWriter();
             writer.SetString(Id);
             writer.SetString(Pw);
         }
@@ -59,9 +58,8 @@ namespace Packet
         public long AccountId;
         public List<Item> Inven = new List<Item>();
 
-        public override void Encode(out PacketWriter writer)
+        public override void Encode(PacketWriter writer)
         {
-            writer = new PacketWriter();
             writer.SetInt(Result);
             if (0 != Result)
                 return;
@@ -100,9 +98,8 @@ namespace Packet
     {
         public string Name;
 
-        public override void Encode(out PacketWriter writer)
+        public override void Encode(PacketWriter writer)
         {
-            writer = new PacketWriter();
             writer.SetString(Name);
         }
 

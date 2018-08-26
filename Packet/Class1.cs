@@ -6,7 +6,7 @@ namespace Packet
     public abstract class PacketBase
     {
         public int PacketId;
-        public abstract void Encode(out PacketWriter writer);
+        public abstract void Encode(PacketWriter writer);
     }
 
     public enum ePacketId

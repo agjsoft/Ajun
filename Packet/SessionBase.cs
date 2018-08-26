@@ -14,10 +14,10 @@ namespace Packet
 
         public void Send(PacketBase packet)
         {
-            PacketWriter pw;
-            packet.Encode(out pw);
-            pw.Close(packet.PacketId);
-            Socket.Send(pw.Buffer, pw.Pos, SocketFlags.None);
+            var writer = new PacketWriter();
+            packet.Encode(writer);
+            writer.Close(packet.PacketId);
+            Socket.Send(writer.Buffer, writer.Pos, SocketFlags.None);
         }
     }
 }
