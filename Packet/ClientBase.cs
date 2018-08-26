@@ -13,7 +13,7 @@ namespace Packet
         public int Tail = 0;
 
         public abstract void OnConnect();
-        public abstract void OnPacket(PacketId packetId, PacketReader reader);
+        public abstract void OnPacket(int packetId, PacketReader reader);
 
         public void Init(string ip, int port)
         {
@@ -52,9 +52,7 @@ namespace Packet
                     if (dataLen < packetSize)
                         break;
 
-                    OnPacket(
-                        (PacketId)BitConverter.ToInt32(PacketBuffer, Head + 4),
-                        new PacketReader(PacketBuffer, Head + 8));
+                    OnPacket(BitConverter.ToInt32(PacketBuffer, Head + 4), new PacketReader(PacketBuffer, Head + 8));
                     Head += packetSize;
                 }
 

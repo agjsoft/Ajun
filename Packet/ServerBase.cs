@@ -62,7 +62,7 @@ namespace Packet
                         break;
 
                     session.OnPacket(
-                        (PacketId)BitConverter.ToInt32(session.PacketBuffer, session.Head + 4),
+                        BitConverter.ToInt32(session.PacketBuffer, session.Head + 4),
                         new PacketReader(session.PacketBuffer, session.Head + 8));
                     session.Head += packetSize;
                 }

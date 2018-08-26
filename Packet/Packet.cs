@@ -17,7 +17,7 @@ namespace Packet
 
         public LoginReqPacket()
         {
-            PacketId = PacketId.LoginReq;
+            PacketId = (int)ePacketId.LoginReq;
         }
 
         public LoginReqPacket(PacketReader reader)
@@ -77,7 +77,7 @@ namespace Packet
 
         public LoginAckPacket()
         {
-            PacketId = PacketId.LoginAck;
+            PacketId = (int)ePacketId.LoginAck;
         }
 
         public LoginAckPacket(PacketReader reader)
@@ -108,7 +108,7 @@ namespace Packet
 
         public UpdateNameReqPacket()
         {
-            PacketId = PacketId.UpdateNameReq;
+            PacketId = (int)ePacketId.UpdateNameReq;
         }
 
         public UpdateNameReqPacket(PacketReader reader)

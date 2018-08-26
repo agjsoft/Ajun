@@ -10,7 +10,7 @@ namespace Packet
         public int Head = 0;
         public int Tail = 0;
 
-        public abstract void OnPacket(PacketId packetId, PacketReader reader);
+        public abstract void OnPacket(int packetId, PacketReader reader);
 
         public void Send(PacketBase packet)
         {

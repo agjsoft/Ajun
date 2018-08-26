@@ -5,11 +5,11 @@ namespace Packet
 {
     public abstract class PacketBase
     {
-        public PacketId PacketId;
+        public int PacketId;
         public abstract void Encode(out PacketWriter writer);
     }
 
-    public enum PacketId
+    public enum ePacketId
     {
         LoginReq = 7700,
         LoginAck,
@@ -82,10 +82,10 @@ namespace Packet
         public byte[] Buffer = new byte[2048];
         public int Pos = 8;
 
-        public void Close(PacketId packetId)
+        public void Close(int packetId)
         {
             Array.Copy(BitConverter.GetBytes(Pos), 0, Buffer, 0, sizeof(int));
-            Array.Copy(BitConverter.GetBytes((int)packetId), 0, Buffer, 4, sizeof(int));
+            Array.Copy(BitConverter.GetBytes(packetId), 0, Buffer, 4, sizeof(int));
         }
 
         public void SetShort(short val)

@@ -8,11 +8,11 @@ namespace client
         {
         }
 
-        public override void OnPacket(PacketId packetId, PacketReader reader)
+        public override void OnPacket(int packetId, PacketReader reader)
         {
             switch (packetId)
             {
-                case PacketId.LoginAck:
+                case (int)ePacketId.LoginAck:
                     {
                         var packet = new LoginAckPacket(reader);
                         int ret = packet.Result;
