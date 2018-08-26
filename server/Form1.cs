@@ -32,7 +32,7 @@ namespace server
         private void Form1_Load(object sender, EventArgs e)
         {
             timer1.Start();
-            mServer.Init(10000, OnAccept, OnPacket);
+            mServer.Init(10000, OnAccept, OnPacket, OnDisconnect);
         }
 
         private void OnAccept(object sender, EventArgs e)
@@ -42,6 +42,10 @@ namespace server
                 type = optype.label1,
                 data = (int)sender
             });
+        }
+
+        private void OnDisconnect(object sender, EventArgs e)
+        {
         }
 
         private void OnPacket(object sender, PacketEventArgs e)

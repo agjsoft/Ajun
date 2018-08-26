@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
-using System.Threading;
-using System.Text;
 using Packet;
 
 namespace server
@@ -38,11 +36,13 @@ namespace server
         private Dictionary<Socket, Session> mSessionMap = new Dictionary<Socket, Session>();
         private event EventHandler mOnAccept;
         private event EventHandler<PacketEventArgs> mOnPacket;
+        private event EventHandler mOnDisconnect;
 
-        public void Init(int port, EventHandler accept, EventHandler<PacketEventArgs> packet)
+        public void Init(int port, EventHandler accept, EventHandler<PacketEventArgs> packet, EventHandler disconnect)
         {
             mOnAccept += new EventHandler(accept);
             mOnPacket += new EventHandler<PacketEventArgs>(packet);
+            mOnDisconnect += new EventHandler(disconnect);
 
             mSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             mSocket.Bind(new IPEndPoint(IPAddress.Any, port));
@@ -106,6 +106,7 @@ namespace server
             }
             else
             {
+                mOnDisconnect(session, null);
                 socket.Disconnect(false);
                 socket.Dispose();
                 mSessionMap.Remove(socket);
