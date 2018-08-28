@@ -8,6 +8,12 @@ namespace Packet
         public string Id;
         public string Pw;
 
+        public override void Decode(PacketReader r)
+        {
+            Id = r.GetString();
+            Pw = r.GetString();
+        }
+
         public override void Encode(PacketWriter writer)
         {
             writer.SetString(Id);
@@ -18,36 +24,26 @@ namespace Packet
         {
             PacketId = (int)ePacketId.LoginReq;
         }
-
-        public LoginReqPacket(PacketReader reader)
-        {
-            Id = reader.GetString();
-            Pw = reader.GetString();
-        }
     }
 
-    public class Item
+    public class Item : ITrans
     {
         public int Id;
         public DateTime Expired;
         public int Count;
 
-        public void Encode(PacketWriter writer)
+        public void Encode(PacketWriter w)
         {
-            writer.SetInt(Id);
-            writer.SetDateTime(Expired);
-            writer.SetInt(Count);
+            w.SetInt(Id);
+            w.SetDateTime(Expired);
+            w.SetInt(Count);
         }
 
-        public Item()
+        public void Decode(PacketReader r)
         {
-        }
-
-        public Item(PacketReader reader)
-        {
-            Id = reader.GetInt();
-            Expired = reader.GetDateTime();
-            Count = reader.GetInt();
+            Id = r.GetInt();
+            Expired = r.GetDateTime();
+            Count = r.GetInt();
         }
     }
 
@@ -58,39 +54,33 @@ namespace Packet
         public long AccountId;
         public List<Item> Inven = new List<Item>();
 
-        public override void Encode(PacketWriter writer)
+        public override void Decode(PacketReader r)
         {
-            writer.SetInt(Result);
+            Result = r.GetInt();
             if (0 != Result)
                 return;
 
-            writer.SetString(Message);
-            writer.SetLong(AccountId);
-            writer.SetInt(Inven.Count);
-            foreach (var i in Inven)
-            {
-                i.Encode(writer);
-            }
+            Message = r.GetString();
+            AccountId = r.GetLong();
+            int count = r.GetInt();
+            Inven = r.GetList<Item>();
+        }
+
+        public override void Encode(PacketWriter w)
+        {
+            w.SetInt(Result);
+            if (0 != Result)
+                return;
+
+            w.SetString(Message);
+            w.SetLong(AccountId);
+            w.SetInt(Inven.Count);
+            w.SetList(Inven);
         }
 
         public LoginAckPacket()
         {
             PacketId = (int)ePacketId.LoginAck;
-        }
-
-        public LoginAckPacket(PacketReader reader)
-        {
-            Result = reader.GetInt();
-            if (0 != Result)
-                return;
-
-            Message = reader.GetString();
-            AccountId = reader.GetLong();
-            int count = reader.GetInt();
-            for (int i = 0; i < count; i++)
-            {
-                Inven.Add(new Item(reader));
-            }
         }
     }
 
@@ -98,19 +88,19 @@ namespace Packet
     {
         public string Name;
 
-        public override void Encode(PacketWriter writer)
+        public override void Decode(PacketReader r)
         {
-            writer.SetString(Name);
+            Name = r.GetString();
+        }
+
+        public override void Encode(PacketWriter w)
+        {
+            w.SetString(Name);
         }
 
         public UpdateNameReqPacket()
         {
             PacketId = (int)ePacketId.UpdateNameReq;
-        }
-
-        public UpdateNameReqPacket(PacketReader reader)
-        {
-            Name = reader.GetString();
         }
     }
 }

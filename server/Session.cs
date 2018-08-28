@@ -7,13 +7,13 @@ namespace server
     {
         public string Guid;
 
-        public override void OnPacket(int packetId, PacketReader reader)
+        public override void OnPacket(int packetId, PacketReader r)
         {
             switch (packetId)
             {
                 case (int)ePacketId.LoginReq:
                     {
-                        var packet = new LoginReqPacket(reader);
+                        var packet = Recv<LoginReqPacket>(r);
                         string id = packet.Id;
                         string pw = packet.Pw;
 
@@ -35,7 +35,7 @@ namespace server
                     break;
                 case (int)ePacketId.UpdateNameReq:
                     {
-                        var packet = new UpdateNameReqPacket(reader);
+                        var packet = Recv<UpdateNameReqPacket>(r);
                     }
                     break;
             }

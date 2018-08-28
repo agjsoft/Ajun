@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 
 namespace Packet
@@ -6,7 +7,14 @@ namespace Packet
     public abstract class PacketBase
     {
         public int PacketId;
-        public abstract void Encode(PacketWriter writer);
+        public abstract void Decode(PacketReader r);
+        public abstract void Encode(PacketWriter w);
+    }
+
+    public interface ITrans
+    {
+        void Decode(PacketReader r);
+        void Encode(PacketWriter w);
     }
 
     public enum ePacketId
@@ -75,6 +83,19 @@ namespace Packet
         {
             return new DateTime(GetLong());
         }
+
+        public List<T> GetList<T>() where T : ITrans, new()
+        {
+            var list = new List<T>();
+            int count = GetInt();
+            for (int i = 0; i < count; i++)
+            {
+                var t = new T();
+                t.Decode(this);
+                list.Add(t);
+            }
+            return list;
+        }
     }
 
     public class PacketWriter
@@ -117,6 +138,15 @@ namespace Packet
         public void SetDateTime(DateTime val)
         {
             SetLong(val.Ticks);
+        }
+
+        public void SetList<T>(List<T> list) where T : ITrans
+        {
+            SetInt(list.Count);
+            foreach (T item in list)
+            {
+                item.Encode(this);
+            }
         }
     }
 }
