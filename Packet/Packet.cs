@@ -14,10 +14,10 @@ namespace Packet
             Pw = r.GetString();
         }
 
-        public override void Encode(PacketWriter writer)
+        public override void Encode(PacketWriter w)
         {
-            writer.SetString(Id);
-            writer.SetString(Pw);
+            w.SetString(Id);
+            w.SetString(Pw);
         }
 
         public LoginReqPacket()
