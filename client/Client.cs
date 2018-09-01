@@ -14,7 +14,7 @@ namespace client
             {
                 case (int)ePacketId.LoginAck:
                     {
-                        var packet = Recv<LoginAckPacket>(r);
+                        var packet = r.GetPacket<LoginAckPacket>();
                         int ret = packet.Result;
                         string msg = packet.Message;
                         long id = packet.AccountId;

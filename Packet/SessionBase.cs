@@ -12,13 +12,6 @@ namespace Packet
 
         public abstract void OnPacket(int packetId, PacketReader reader);
 
-        public static V Recv<V>(PacketReader r) where V : PacketBase, new()
-        {
-            var packet = new V();
-            packet.Decode(r);
-            return packet;
-        }
-
         public void Send(PacketBase packet)
         {
             var writer = new PacketWriter();

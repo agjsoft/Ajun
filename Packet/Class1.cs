@@ -36,6 +36,13 @@ namespace Packet
             Pos = pos;
         }
 
+        public V GetPacket<V>() where V : PacketBase, new()
+        {
+            var packet = new V();
+            packet.Decode(this);
+            return packet;
+        }
+
         public short GetShort()
         {
             short val = BitConverter.ToInt16(Buffer, Pos);

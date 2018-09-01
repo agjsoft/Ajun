@@ -13,7 +13,7 @@ namespace server
             {
                 case (int)ePacketId.LoginReq:
                     {
-                        var packet = Recv<LoginReqPacket>(r);
+                        var packet = r.GetPacket<LoginReqPacket>();
                         string id = packet.Id;
                         string pw = packet.Pw;
 
@@ -35,7 +35,7 @@ namespace server
                     break;
                 case (int)ePacketId.UpdateNameReq:
                     {
-                        var packet = Recv<UpdateNameReqPacket>(r);
+                        var packet = r.GetPacket<UpdateNameReqPacket>();
                     }
                     break;
             }
