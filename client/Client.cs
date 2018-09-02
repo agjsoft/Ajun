@@ -1,10 +1,11 @@
-﻿using Packet;
+﻿using System.Net.Sockets;
+using Packet;
 
 namespace client
 {
     public class Client : ClientBase
     {
-        public override void OnConnect()
+        public override void OnConnect(SocketError result)
         {
         }
 

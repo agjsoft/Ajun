@@ -7,14 +7,14 @@ namespace Packet
 {
     public abstract class ClientBase
     {
-        private Socket Socket = null;
+        public Socket Socket = null;
         public object SendLock = new object();
         public byte[] Buffer = new byte[1024];
         public byte[] PacketBuffer = new byte[8192];
         public int Head = 0;
         public int Tail = 0;
 
-        public abstract void OnConnect();
+        public abstract void OnConnect(SocketError result);
         public abstract void OnPacket(int packetId, PacketReader reader);
 
         public void Init(string ip, int port)
@@ -29,7 +29,9 @@ namespace Packet
 
         private void Connect_Completed(object sender, SocketAsyncEventArgs e)
         {
-            OnConnect();
+            OnConnect(e.SocketError);
+            if (e.SocketError != SocketError.Success)
+                return;
 
             var args = new SocketAsyncEventArgs();
             args.SetBuffer(Buffer, 0, Buffer.Length);
