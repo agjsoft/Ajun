@@ -30,7 +30,7 @@ namespace server
                                 Count = i % 5
                             });
                         }
-                        Send(sendPacket);
+                        SendAsync(sendPacket);
                     }
                     break;
                 case (int)ePacketId.UpdateNameReq:

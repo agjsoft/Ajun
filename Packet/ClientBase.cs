@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading.Tasks;
 
 namespace Packet
 {
     public abstract class ClientBase
     {
-        private Socket mSocket = null;
+        private Socket Socket = null;
+        public object SendLock = new object();
         public byte[] Buffer = new byte[1024];
         public byte[] PacketBuffer = new byte[8192];
         public int Head = 0;
@@ -17,12 +19,12 @@ namespace Packet
 
         public void Init(string ip, int port)
         {
-            mSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            Socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
             var args = new SocketAsyncEventArgs();
             args.RemoteEndPoint = new IPEndPoint(IPAddress.Parse(ip), port);
             args.Completed += new EventHandler<SocketAsyncEventArgs>(Connect_Completed);
-            mSocket.ConnectAsync(args);
+            Socket.ConnectAsync(args);
         }
 
         private void Connect_Completed(object sender, SocketAsyncEventArgs e)
@@ -32,12 +34,12 @@ namespace Packet
             var args = new SocketAsyncEventArgs();
             args.SetBuffer(Buffer, 0, Buffer.Length);
             args.Completed += new EventHandler<SocketAsyncEventArgs>(Receive_Completed);
-            mSocket.ReceiveAsync(args);
+            Socket.ReceiveAsync(args);
         }
 
         private void Receive_Completed(object sender, SocketAsyncEventArgs e)
         {
-            if (mSocket.Connected && e.BytesTransferred > 0)
+            if (Socket.Connected && e.BytesTransferred > 0)
             {
                 Array.Copy(e.Buffer, 0, PacketBuffer, Tail, e.BytesTransferred);
                 Tail += e.BytesTransferred;
@@ -56,21 +58,34 @@ namespace Packet
                     Head += packetSize;
                 }
 
-                mSocket.ReceiveAsync(e);
+                Socket.ReceiveAsync(e);
             }
             else
             {
-                mSocket.Disconnect(false);
-                mSocket.Dispose();
+                Socket.Disconnect(false);
+                Socket.Dispose();
             }
         }
 
-        public void Send(PacketBase packet)
+        private void SendCommon(PacketBase packet)
         {
             var writer = new PacketWriter();
             packet.Encode(writer);
             writer.Close(packet.PacketId);
-            mSocket.Send(writer.Buffer, writer.Pos, SocketFlags.None);
+            lock (SendLock)
+            {
+                Socket.Send(writer.Buffer, writer.Pos, SocketFlags.None);
+            }
+        }
+
+        public void SendSync(PacketBase packet)
+        {
+            SendCommon(packet);
+        }
+
+        public void SendAsync(PacketBase packet)
+        {
+            Task.Run(() => SendCommon(packet));
         }
     }
 }

@@ -22,7 +22,7 @@ namespace client
             var packet = new LoginReqPacket();
             packet.Id = "apple";
             packet.Pw = "wpvpxh12#$";
-            client.Send(packet);
+            client.SendAsync(packet);
 
             mClientList.Add(client);
         }
