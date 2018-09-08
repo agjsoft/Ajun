@@ -3,7 +3,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 
-namespace Engine
+namespace AEngine
 {
     public abstract class ClientBase
     {
@@ -64,6 +64,7 @@ namespace Engine
             }
             else
             {
+                Socket.Disconnect(false);
                 Socket.Dispose();
             }
         }

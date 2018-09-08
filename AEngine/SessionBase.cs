@@ -1,7 +1,7 @@
 ﻿using System.Net.Sockets;
 using System.Threading.Tasks;
 
-namespace Engine
+namespace AEngine
 {
     public abstract class SessionBase
     {
