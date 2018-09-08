@@ -1,4 +1,4 @@
-﻿namespace Packet
+﻿namespace Engine
 {
     public abstract class PacketBase
     {
@@ -11,13 +11,5 @@
     {
         void Decode(PacketReader r);
         void Encode(PacketWriter w);
-    }
-
-    public enum ePacketId
-    {
-        LoginReq = 7700,
-        LoginAck,
-        UpdateNameReq,
-        UpdateNameAck,
     }
 }

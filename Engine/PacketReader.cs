@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Packet
+namespace Engine
 {
     public class PacketReader
     {

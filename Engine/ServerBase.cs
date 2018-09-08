@@ -2,7 +2,7 @@
 using System.Net;
 using System.Net.Sockets;
 
-namespace Packet
+namespace Engine
 {
     public abstract class ServerBase<T> where T : SessionBase, new()
     {
@@ -72,8 +72,7 @@ namespace Packet
             else
             {
                 OnDisconnect(session);
-                socket.Disconnect(false);
-                socket.Dispose();
+                mSocket.Dispose();
             }
         }
     }
