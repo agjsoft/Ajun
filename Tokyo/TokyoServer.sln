@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27703.2035
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TokyoServer", "TokyoServer\TokyoServer.csproj", "{E50D7E2E-B308-47E2-9569-E67EA41195A4}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E50D7E2E-B308-47E2-9569-E67EA41195A4}.Debug|x64.ActiveCfg = Debug|x64
+		{E50D7E2E-B308-47E2-9569-E67EA41195A4}.Debug|x64.Build.0 = Debug|x64
+		{E50D7E2E-B308-47E2-9569-E67EA41195A4}.Release|x64.ActiveCfg = Release|x64
+		{E50D7E2E-B308-47E2-9569-E67EA41195A4}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3E7F90E8-6F61-4BD3-86DA-4BDAB057D1E4}
+	EndGlobalSection
+EndGlobal
