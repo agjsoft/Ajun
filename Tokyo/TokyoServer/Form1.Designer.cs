@@ -39,6 +39,7 @@
             this.MinimizeBox = false;
             this.Name = "Form1";
             this.Text = "TokyoServer";
+            this.Load += new System.EventHandler(this.Form1_Load);
             this.ResumeLayout(false);
 
         }
